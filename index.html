@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>UCH Explore - University College Hospital, Ibadan</title>
+    <meta name="description" content="Interactive evidence-based 3D explorer of University College Hospital, Ibadan, Nigeria." />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div id="app-container">
+      <!-- 3D WebGL Canvas Layer -->
+      <div id="canvas-container"></div>
+
+      <!-- Top Header & Disclaimer -->
+      <header class="top-bar">
+        <div class="disclaimer-banner">
+          Independent project. Not an official UCH map. Locations and access information are under verification.
+        </div>
+        <div class="main-header">
+          <div class="brand-group">
+            <div class="logo-badge">UCH</div>
+            <div class="title-text">
+              <h1>UCH Explore</h1>
+              <p>University College Hospital, Ibadan, Nigeria</p>
+            </div>
+          </div>
+          <div class="header-controls">
+            <button id="btn-toggle-walk" class="btn-icon" title="Toggle First-Person Walking">
+              <span>🚶</span> <span>Walk</span>
+            </button>
+            <button id="btn-toggle-night" class="btn-icon" title="Toggle Day/Night Mode">
+              <span id="night-icon">🌙</span> <span id="night-label">Night</span>
+            </button>
+            <button id="btn-toggle-quality" class="btn-icon" title="Toggle Low/High Quality">
+              <span id="quality-label">⚡ High</span>
+            </button>
+            <a href="./review.html" class="btn-icon" title="Open Map Review & Footprint Editor">
+              <span>🗺️</span> <span>Review Map</span>
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <!-- Walking Mode Banner -->
+      <div id="walk-banner" class="walk-banner">
+        <span>🚶 Walking Mode (WASD / Touch Joystick to move, Drag to look)</span>
+        <button id="btn-exit-walk">Exit to Orbit</button>
+      </div>
+
+      <!-- Left Sidebar: Search Directory -->
+      <aside id="sidebar" class="sidebar">
+        <div class="search-header">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              id="search-input"
+              class="search-input"
+              placeholder="Search departments, wards, clinics..."
+              autocomplete="off"
+            />
+          </div>
+          <div class="category-filter-scroll" id="filter-container">
+            <button class="filter-chip active" data-category="All">All</button>
+            <button class="filter-chip" data-category="Emergency">Emergency</button>
+            <button class="filter-chip" data-category="Clinical">Clinical</button>
+            <button class="filter-chip" data-category="Diagnostic">Diagnostic</button>
+            <button class="filter-chip" data-category="Pharmacy">Pharmacy</button>
+            <button class="filter-chip" data-category="Academic">Academic</button>
+            <button class="filter-chip" data-category="Student">Student</button>
+            <button class="filter-chip" data-category="Entrance">Entrances</button>
+          </div>
+        </div>
+        <div class="directory-list" id="directory-list">
+          <!-- Populated dynamically -->
+        </div>
+      </aside>
+
+      <!-- Right Detail Slide-out Drawer -->
+      <section id="detail-drawer" class="detail-drawer">
+        <div class="drawer-header">
+          <button id="drawer-close" class="drawer-close-btn" aria-label="Close details">&times;</button>
+          <div id="drawer-category" class="drawer-category">CLINICAL</div>
+          <h2 id="drawer-title" class="drawer-title">Department Title</h2>
+        </div>
+        <div class="drawer-body">
+          <div id="drawer-desc" class="drawer-desc">Description of destination.</div>
+
+          <div class="section-label">Building Identity & Footprint</div>
+          <div class="drawer-meta-grid">
+            <div>
+              <div class="meta-item-label">BUILDING ID</div>
+              <div id="meta-bld-id" class="meta-item-value">uch-bld-0</div>
+            </div>
+            <div>
+              <div class="meta-item-label">CONFIDENCE</div>
+              <div id="meta-confidence" class="meta-item-value">Verified</div>
+            </div>
+            <div>
+              <div class="meta-item-label">ESTIMATED LEVELS</div>
+              <div id="meta-levels" class="meta-item-value">6 Floors (~22m)</div>
+            </div>
+            <div>
+              <div class="meta-item-label">FOOTPRINT AREA</div>
+              <div id="meta-area" class="meta-item-value">~3,054 m²</div>
+            </div>
+          </div>
+
+          <div class="section-label">Architecture Note</div>
+          <p id="drawer-arch" style="font-size: 0.8rem; color: var(--warm-text-muted);"></p>
+
+          <div class="section-label">Verified Access & Entrances</div>
+          <div id="drawer-access" class="access-box">
+            Entrance information under verification.
+          </div>
+
+          <div class="section-label">Evidence & Sources</div>
+          <ul id="drawer-sources" class="sources-list"></ul>
+        </div>
+      </section>
+
+      <!-- Bottom Controls & Confidence Legend -->
+      <div class="bottom-bar">
+        <div class="legend-box">
+          <div class="legend-item">
+            <span class="legend-dot verified"></span>
+            <span>Verified</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot high"></span>
+            <span>High Confidence</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot approx"></span>
+            <span>Approximate / Gap</span>
+          </div>
+        </div>
+
+        <div class="quick-shortcuts">
+          <button id="btn-full-view" class="btn-icon" title="Reset camera to campus overview">
+            <span>🌐</span> <span>Full View</span>
+          </button>
+          <button id="btn-main-gate" class="btn-icon" title="Jump to Queen Elizabeth Road Main Gate">
+            <span>⛩️</span> <span>Main Gate</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Touch Virtual Joystick (For mobile walking) -->
+      <div id="walk-touch-overlay" class="walk-touch-overlay">
+        <div id="joystick-base" class="virtual-joystick-base">
+          <div id="joystick-nipple" class="virtual-joystick-nipple"></div>
+        </div>
+      </div>
+
+      <!-- Initial Loading Screen -->
+      <div id="loading-overlay">
+        <div class="loader-spinner"></div>
+        <div class="loading-text">Loading UCH Explore...</div>
+        <div class="loading-subtext">Preparing 495 building footprints and hospital road networks</div>
+      </div>
+
+      <!-- WebGL Error Fallback Modal -->
+      <div id="webgl-error-modal">
+        <div class="error-card">
+          <h2>3D Acceleration Unavailable</h2>
+          <p>
+            Your browser could not initialize WebGL 3D rendering. Please enable hardware acceleration in your browser
+            settings, or explore the map via our 2D Leaflet review workspace below.
+          </p>
+          <a href="./review.html">Switch to 2D Map Workspace</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Explorer Script -->
+    <script type="module" src="./src/explorer.ts"></script>
+  </body>
+</html>

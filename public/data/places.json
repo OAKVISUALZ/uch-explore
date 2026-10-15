@@ -1,0 +1,428 @@
+[
+  {
+    "id": "uch-gate-main",
+    "name": "UCH Main Gate (Oritamefa)",
+    "shortName": "Main Gate",
+    "category": "Entrance",
+    "type": "gate",
+    "targetBuildingId": null,
+    "coordinates": [
+      3.9038,
+      7.40115
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "Primary public and vehicular entrance on Queen Elizabeth II Road. 24/7 security checkpoint, pedestrian turnstiles and vehicle boom gates.",
+    "description": "The iconic main gateway to University College Hospital, connecting the hospital to Queen Elizabeth II Road, Total Garden, and central Ibadan.",
+    "sources": [
+      {
+        "name": "UCH Official Portal",
+        "url": "https://uch-ibadan.org.ng/",
+        "date": "2026"
+      },
+      {
+        "name": "OpenStreetMap Way 82467201",
+        "url": "https://www.openstreetmap.org/way/82467201",
+        "date": "2024-07-01"
+      }
+    ]
+  },
+  {
+    "id": "uch-gate-east",
+    "name": "UCH East Gate (School of Nursing Road)",
+    "shortName": "East Gate",
+    "category": "Entrance",
+    "type": "gate",
+    "targetBuildingId": null,
+    "coordinates": [
+      3.9082,
+      7.3996
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "East entrance off Queen Elizabeth II Road / School of Nursing Road, providing direct access to nursing residences, schools, and eastern wards.",
+    "description": "Secondary public entrance facilitating patient and staff access to educational institutions and residences.",
+    "sources": [
+      {
+        "name": "Waze Nigeria UCH East Gate Navigation",
+        "url": "https://www.waze.com/en-GB/live-map/directions/ng/oyo/ibadan/uch-east-gate",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-ae",
+    "name": "Accident & Emergency (A&E) Department",
+    "shortName": "A&E Emergency",
+    "category": "Emergency",
+    "type": "clinical",
+    "targetBuildingId": "uch-bld-1288019037",
+    "coordinates": [
+      3.90234,
+      7.40283
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "Ground floor dedicated casualty ambulance drop-off ramp on the southern frontage of the central ward block. Open 24 hours.",
+    "description": "The primary emergency care center of UCH, receiving acute adult and surgical trauma, medical emergencies, and resuscitation cases.",
+    "sources": [
+      {
+        "name": "UCH Emergency Medicine Clinical Unit",
+        "url": "https://uch-ibadan.org.ng/clinical-services/",
+        "date": "2026"
+      },
+      {
+        "name": "OpenStreetMap Building 1288019037",
+        "url": "https://www.openstreetmap.org/way/1288019037",
+        "date": "2024"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-central-ward",
+    "name": "Main Hospital Complex (Central Ward Block)",
+    "shortName": "Central Wards",
+    "category": "Clinical",
+    "type": "hospital",
+    "targetBuildingId": "uch-bld-1288019041",
+    "coordinates": [
+      3.90244,
+      7.40334
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "Main hospital entrance hall on ground floor; central lift bank and ramps access inpatient wards (Floors 1-6).",
+    "description": "The architectural centerpiece of UCH: the landmark 6-story modernist inpatient hospital commissioned in November 1957 by Queen Elizabeth II. Features distinctive concrete sunshade louvers (brise-soleil) and multi-tier ward fingers.",
+    "sources": [
+      {
+        "name": "UCH Ibadan Historical Archives",
+        "url": "https://uch-ibadan.org.ng/about-us/",
+        "date": "2026"
+      },
+      {
+        "name": "Wikipedia - University College Hospital, Ibadan",
+        "url": "https://en.wikipedia.org/wiki/University_College_Hospital,_Ibadan",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-east-ward",
+    "name": "East Clinical Ward Block",
+    "shortName": "East Wards",
+    "category": "Clinical",
+    "type": "hospital",
+    "targetBuildingId": "uch-bld-843737445",
+    "coordinates": [
+      3.90285,
+      7.40304
+    ],
+    "confidence": "high_confidence",
+    "entranceVerified": false,
+    "accessNotes": "Connected to central ward spine via covered pedestrian corridors.",
+    "description": "Inpatient surgical and medical specialty wards occupying the eastern finger of the primary ward structure.",
+    "sources": [
+      {
+        "name": "OpenStreetMap Building 843737445",
+        "url": "https://www.openstreetmap.org/way/843737445",
+        "date": "2024"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-west-ward",
+    "name": "West Clinical Ward Block",
+    "shortName": "West Wards",
+    "category": "Clinical",
+    "type": "hospital",
+    "targetBuildingId": "uch-bld-843737464",
+    "coordinates": [
+      3.90098,
+      7.4031
+    ],
+    "confidence": "high_confidence",
+    "entranceVerified": false,
+    "accessNotes": "Accessible from central spine and western perimeter road.",
+    "description": "Multi-tier ward wing housing obstetric, gynaecological, and paediatric inpatient services.",
+    "sources": [
+      {
+        "name": "OpenStreetMap Building 843737464",
+        "url": "https://www.openstreetmap.org/way/843737464",
+        "date": "2024"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-geriatric",
+    "name": "Chief Tony Anenih Geriatric Centre (CTAGC)",
+    "shortName": "Geriatric Centre",
+    "category": "Clinical",
+    "type": "specialist",
+    "targetBuildingId": "uch-bld-843737462",
+    "coordinates": [
+      3.90262,
+      7.40214
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "Ramp access on Queen Elizabeth Road approach frontage, purpose-built for elderly and mobility-impaired patients.",
+    "description": "The pioneer purpose-built geriatric medical center in West Africa, inaugurated in November 2012. Specializes in comprehensive holistic care for seniors aged 60 and above.",
+    "sources": [
+      {
+        "name": "Chief Tony Anenih Geriatric Centre Monograph",
+        "url": "https://uch-ibadan.org.ng/geriatric-centre/",
+        "date": "2026"
+      },
+      {
+        "name": "Google Maps Plus Code CW23+FJV",
+        "url": "https://maps.google.com/?q=7.4018,3.9038",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-otchew",
+    "name": "Otunba Tunwase Children's Emergency Ward (OTCHEW)",
+    "shortName": "Children's Emergency",
+    "category": "Emergency",
+    "type": "paediatric",
+    "targetBuildingId": "uch-bld-1288019036",
+    "coordinates": [
+      3.90297,
+      7.40261
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "Paediatric emergency bay with dedicated triage and stabilization room on the south clinic frontage.",
+    "description": "Endowed paediatric emergency ward established through Otunba Subomi Balogun, providing intensive emergency medical treatment for infants and children.",
+    "sources": [
+      {
+        "name": "University of Ibadan Paediatrics Department",
+        "url": "https://com.ui.edu.ng/paediatrics/",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-rad-onc",
+    "name": "Department of Radiation Oncology",
+    "shortName": "Radiation Oncology",
+    "category": "Diagnostic",
+    "type": "diagnostic",
+    "targetBuildingId": "uch-bld-843737417",
+    "coordinates": [
+      3.90381,
+      7.40307
+    ],
+    "confidence": "verified",
+    "entranceVerified": false,
+    "accessNotes": "Accessed via the Radiation Oncology service road off the central hospital spine.",
+    "description": "Nigeria's premier cancer radiotherapy facility, equipped with teletherapy, brachytherapy suites, and treatment simulation facilities.",
+    "sources": [
+      {
+        "name": "OpenStreetMap Highway 451321718 'Radiation Oncology'",
+        "url": "https://www.openstreetmap.org/way/451321718",
+        "date": "2024"
+      },
+      {
+        "name": "UCH Department of Radiotherapy / Radiation Oncology",
+        "url": "https://uch-ibadan.org.ng/radiation-oncology/",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-nuclear-med",
+    "name": "Department of Nuclear Medicine (Afe Babalola Building)",
+    "shortName": "Nuclear Medicine",
+    "category": "Diagnostic",
+    "type": "diagnostic",
+    "targetBuildingId": "uch-bld-1288019037",
+    "coordinates": [
+      3.90315,
+      7.4033
+    ],
+    "confidence": "verified",
+    "entranceVerified": false,
+    "accessNotes": "Located inside the Afe Babalola diagnostic complex adjacent to Radiation Oncology.",
+    "description": "Specialized radioactive isotope diagnostic imaging (SPECT/PET-CT) and radionuclide therapy services.",
+    "sources": [
+      {
+        "name": "College of Medicine UI - Nuclear Medicine",
+        "url": "https://com.ui.edu.ng/nuclear-medicine/",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-pharmacy",
+    "name": "UCH Central & Outpatient Pharmacy",
+    "shortName": "Central Pharmacy",
+    "category": "Pharmacy",
+    "type": "pharmacy",
+    "targetBuildingId": "uch-bld-843737468",
+    "coordinates": [
+      3.90188,
+      7.40221
+    ],
+    "confidence": "high_confidence",
+    "entranceVerified": true,
+    "accessNotes": "Ground floor dispensary windows on outpatient concourse.",
+    "description": "Main hospital pharmacy dispensing outpatient prescriptions, compounded medications, and clinical pharmaceutical supplies.",
+    "sources": [
+      {
+        "name": "UCH Pharmaceutical Services Directorate",
+        "url": "https://uch-ibadan.org.ng/pharmacy/",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-physiotherapy",
+    "name": "Department of Physiotherapy & Rehabilitation",
+    "shortName": "Physiotherapy",
+    "category": "Clinical",
+    "type": "rehabilitation",
+    "targetBuildingId": "uch-bld-845882245",
+    "coordinates": [
+      3.8996,
+      7.40172
+    ],
+    "confidence": "high_confidence",
+    "entranceVerified": false,
+    "accessNotes": "Located in the Faculty of Clinical Sciences sector with gymnasium and hydrotherapy access.",
+    "description": "Comprehensive physical medicine, neuro-rehabilitation, orthopaedic rehabilitation, and electrotherapy facilities.",
+    "sources": [
+      {
+        "name": "Nigeria Society of Physiotherapy - UCH Chapter",
+        "url": "https://nigeriaphysio.net/",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-paul-hendrickse",
+    "name": "Paul Hendrickse Lecture Theatre",
+    "shortName": "Paul Hendrickse Hall",
+    "category": "Academic",
+    "type": "lecture_theatre",
+    "targetBuildingId": "uch-bld-843732492",
+    "coordinates": [
+      3.90082,
+      7.40234
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "Tiered lecture theatre entrance on College of Medicine plaza adjacent to E. Latunde Odeku Library.",
+    "description": "Historical central academic lecture auditorium of the College of Medicine, University of Ibadan, named after pioneering obstetrician Professor Paul Hendrickse.",
+    "sources": [
+      {
+        "name": "College of Medicine, University of Ibadan (CoMUI)",
+        "url": "https://com.ui.edu.ng/",
+        "date": "2026"
+      },
+      {
+        "name": "Maptons Landmark Registry CW22+W8P",
+        "url": "https://maptons.com/",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-comui-admin",
+    "name": "College of Medicine, University of Ibadan (Administration)",
+    "shortName": "College of Medicine",
+    "category": "Academic",
+    "type": "academic",
+    "targetBuildingId": "uch-bld-889242311",
+    "coordinates": [
+      3.90136,
+      7.40038
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "Administrative office complex with Provost's office, Faculty deans, and academic registry.",
+    "description": "Administrative headquarters of the College of Medicine, University of Ibadan, situated within the UCH campus perimeter.",
+    "sources": [
+      {
+        "name": "CoMUI Official Directory",
+        "url": "https://com.ui.edu.ng/administration/",
+        "date": "2026"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-abh",
+    "name": "Alexander Brown Hall (ABH)",
+    "shortName": "ABH Hostel",
+    "category": "Student",
+    "type": "hostel",
+    "targetBuildingId": "uch-bld-1288020360",
+    "coordinates": [
+      3.90456,
+      7.4042
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "Accessed via Alexander Brown Hostel Road off the central ring road. Security turnstile for registered clinical students.",
+    "description": "The official residential hall for clinical medical, dental, and health sciences students of the University of Ibadan.",
+    "sources": [
+      {
+        "name": "Alexander Brown Hall Official Portal",
+        "url": "https://alexanderbrownhall.com/",
+        "date": "2026"
+      },
+      {
+        "name": "OpenStreetMap Building 1288020360",
+        "url": "https://www.openstreetmap.org/way/1288020360",
+        "date": "2024"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-mosque",
+    "name": "UCH Central Mosque",
+    "shortName": "UCH Mosque",
+    "category": "Services",
+    "type": "worship",
+    "targetBuildingId": "uch-bld-451326675",
+    "coordinates": [
+      3.90562,
+      7.40465
+    ],
+    "confidence": "verified",
+    "entranceVerified": true,
+    "accessNotes": "Worship ground with ablution facilities situated on the northeastern residential quadrant.",
+    "description": "Community place of worship serving Muslim patients, visitors, and hospital staff.",
+    "sources": [
+      {
+        "name": "OpenStreetMap Way 451326675 (UCH Mosque)",
+        "url": "https://www.openstreetmap.org/way/451326675",
+        "date": "2024"
+      }
+    ]
+  },
+  {
+    "id": "uch-bld-nursing",
+    "name": "School of Nursing & Midwifery",
+    "shortName": "School of Nursing",
+    "category": "Academic",
+    "type": "school",
+    "targetBuildingId": null,
+    "coordinates": [
+      3.908,
+      7.4005
+    ],
+    "confidence": "approximate",
+    "entranceVerified": false,
+    "accessNotes": "Accessed via School of Nursing Road near East Gate. Specific classroom vs hostel pavilion footprint assignment is currently under review in the map workspace.",
+    "description": "One of Nigeria's premier institutions for general nursing and basic midwifery education, situated in the eastern academic and residential sector of UCH.",
+    "sources": [
+      {
+        "name": "UCH Schools of Nursing & Midwifery Directory",
+        "url": "https://uch-ibadan.org.ng/school-of-nursing/",
+        "date": "2026"
+      }
+    ]
+  }
+]

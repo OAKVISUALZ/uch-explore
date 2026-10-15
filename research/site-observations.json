@@ -1,0 +1,31 @@
+{
+  "site": "University College Hospital (UCH), Ibadan",
+  "location": "Queen Elizabeth II Road, Oritamefa, Ibadan, Oyo State, Nigeria",
+  "date_analyzed": "2026-10-15",
+  "gates": [
+    {
+      "id": "main-gate",
+      "name": "Main Gate (Queen Elizabeth II Road)",
+      "coordinates": [
+        3.9038,
+        7.40115
+      ],
+      "verified": true,
+      "notes": "Two vehicular lanes separated by a central security island, overhead cantilever gate signage, pedestrian side gates."
+    },
+    {
+      "id": "east-gate",
+      "name": "East Gate (School of Nursing Road)",
+      "coordinates": [
+        3.9082,
+        7.3996
+      ],
+      "verified": true,
+      "notes": "Direct entry to schools, student hostels, and eastern services."
+    }
+  ],
+  "architectural_language": {
+    "primary_complex": "Tropical modernist mid-century clinical complex designed in the 1950s. Deep projecting concrete overhangs, white and warm sand rendered walls, horizontal sun louver panels (brise-soleil) for passive cooling.",
+    "landscape": "Extensive mature tropical trees (flamboyant, mahogany, neem, royal palms), manicured lawn verges along Queen Elizabeth Road frontage and inner courtyards."
+  }
+}

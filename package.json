@@ -1,0 +1,24 @@
+{
+  "name": "uch-explore",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive browser-based 3D explorer of University College Hospital, Ibadan, Nigeria",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "data": "python scripts/prepare_data.py",
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "three": "^0.174.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.16",
+    "@types/three": "^0.174.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0"
+  }
+}

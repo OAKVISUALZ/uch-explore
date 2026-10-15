@@ -1,0 +1,47 @@
+{
+  "project": "UCH Explore",
+  "institution": "University College Hospital, Ibadan, Nigeria",
+  "disclaimer": "Independent project. Not an official UCH map. Locations and access information are under verification.",
+  "boundary_osm_way": 82467201,
+  "boundary_bounds": {
+    "min_lon": 3.8972374,
+    "min_lat": 7.3991462,
+    "max_lon": 3.9099833,
+    "max_lat": 7.4064236
+  },
+  "origin": {
+    "lon": 3.903,
+    "lat": 7.4025,
+    "description": "Local Cartesian projection origin centered on UCH central clinical grounds"
+  },
+  "projection": {
+    "type": "Equirectangular / Metric Cartesian",
+    "meters_per_degree_lat": 110574.0,
+    "meters_per_degree_lon": 110392.0,
+    "formula_x": "(lon - origin.lon) * 110392.0",
+    "formula_z": "-(lat - origin.lat) * 110574.0",
+    "formula_y": "elevation_m"
+  },
+  "sources": [
+    {
+      "name": "OpenStreetMap",
+      "attribution": "\u00a9 OpenStreetMap contributors",
+      "license": "Open Database License (ODbL) 1.0",
+      "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "date_extracted": "2026-10-15",
+      "dataset_summary": "Footprints from OSM Way 82467201 boundary polygon with 495 building features and 61 road/path ways"
+    },
+    {
+      "name": "University College Hospital, Ibadan Official Portal",
+      "url": "https://uch-ibadan.org.ng/",
+      "date_accessed": "2026-10-15",
+      "purpose": "Institutional department verification, clinical service directories, entrance locations"
+    },
+    {
+      "name": "College of Medicine, University of Ibadan (CoMUI)",
+      "url": "https://com.ui.edu.ng/",
+      "date_accessed": "2026-10-15",
+      "purpose": "Academic lecture theatres, clinical science buildings, ABH hostel verification"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UCH Map Review & Contributor Workspace</title>
+    <meta name="description" content="Review, verify and propose department allocations and entrance data for UCH Ibadan footprints." />
+    <link rel="stylesheet" href="./src/review.css" />
+  </head>
+  <body>
+    <div id="review-app">
+      <!-- Top Action Bar -->
+      <header class="review-header">
+        <div class="brand-section">
+          <h1>UCH Map Review Workspace</h1>
+          <p>Inspect, verify, and propose footprint attributes with evidence</p>
+        </div>
+        <div class="action-bar">
+          <button id="btn-export-json" class="btn btn-primary" title="Export local drafts as versioned JSON">
+            <span>💾</span> <span>Export JSON</span>
+          </button>
+          <label class="btn btn-secondary" title="Import draft review JSON" style="cursor: pointer;">
+            <span>📂</span> <span>Import JSON</span>
+            <input type="file" id="file-import-json" accept=".json" style="display: none;" />
+          </label>
+          <a href="./index.html" class="btn btn-secondary" title="Return to 3D Explorer">
+            <span>🏛️</span> <span>3D Explorer</span>
+          </a>
+        </div>
+      </header>
+
+      <!-- Main Workspace -->
+      <main class="review-content">
+        <!-- Leaflet Map Container -->
+        <div id="map-view"></div>
+
+        <!-- Filter Bar Over Map -->
+        <div class="map-filter-bar">
+          <span class="filter-option active" data-filter="all">All Footprints (<span id="count-all">0</span>)</span>
+          <span class="filter-option" data-filter="identified">Identified (<span id="count-identified">0</span>)</span>
+          <span class="filter-option" data-filter="unidentified">Unidentified (<span id="count-unidentified">0</span>)</span>
+          <span class="filter-option" data-filter="proposed">Draft Proposals (<span id="count-proposed">0</span>)</span>
+        </div>
+
+        <!-- Right Proposal Editor Panel -->
+        <aside class="review-panel">
+          <div class="panel-header">
+            <h2 id="panel-title" class="panel-title">Footprint Details</h2>
+            <p id="panel-subtitle" class="panel-subtitle">Select a building footprint on the map to begin</p>
+          </div>
+
+          <div id="panel-body" class="panel-body">
+            <!-- Rendered dynamically -->
+            <div class="empty-state">
+              <div class="empty-icon">📍</div>
+              <p>Click any hospital building polygon on the map to view its OpenStreetMap geometry, existing name, or propose a verified department association.</p>
+            </div>
+          </div>
+        </aside>
+      </main>
+
+      <!-- Toast Feedback Message -->
+      <div id="toast-notice" class="toast-notice"></div>
+    </div>
+
+    <!-- Review Script -->
+    <script type="module" src="./src/review.ts"></script>
+  </body>
+</html>
