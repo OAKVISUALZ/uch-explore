@@ -2,6 +2,9 @@
 
 **UCH Explore** is an interactive, browser-based 3D explorer of **University College Hospital (UCH), Ibadan, Oyo State, Nigeria**.
 
+🌐 **Live Deployment:** [https://spiffy-bunny-098931.netlify.app](https://spiffy-bunny-098931.netlify.app)  
+🗺️ **Map Review Workspace:** [https://spiffy-bunny-098931.netlify.app/review.html](https://spiffy-bunny-098931.netlify.app/review.html)
+
 The goal of this project is an evidence-based, recognizable reconstruction of UCH’s main grounds (Oritamefa/Agodi axis) to help patients, students, staff, and visitors understand the campus geography, navigate to clinical departments, and locate key destinations.
 
 > **Important Notice:**  
