@@ -68,11 +68,28 @@ class MapReviewApp {
       maxZoom: 19,
     });
 
-    // OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // OpenStreetMap standard tiles
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
-    }).addTo(this.map);
+    });
+
+    // Esri World Imagery Satellite tiles
+    const satelliteLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+        maxZoom: 19,
+      }
+    );
+
+    osmLayer.addTo(this.map);
+
+    // Layer switch control (Street vs Satellite)
+    L.control.layers({
+      '🗺️ Street Map (OSM)': osmLayer,
+      '🛰️ Satellite (Esri Imagery)': satelliteLayer,
+    }, undefined, { position: 'topright' }).addTo(this.map);
 
     // Map click for entrance pinning
     this.map.on('click', (e: L.LeafletMouseEvent) => {
@@ -254,8 +271,11 @@ class MapReviewApp {
         </div>
 
         <div class="form-group">
-          <label for="prop-evidence-url">Evidence Source URL *</label>
-          <input type="url" id="prop-evidence-url" class="form-control" placeholder="https://uch-ibadan.org.ng/..." value="${proposal ? proposal.evidenceUrl : ''}" />
+          <label for="prop-evidence-url">Evidence Source / Photo URL *</label>
+          <input type="url" id="prop-evidence-url" class="form-control" placeholder="https://... (URL to directory or sign photo)" value="${proposal ? proposal.evidenceUrl : ''}" />
+          <div id="prop-img-preview" style="margin-top: 6px; display: none; text-align: center; background: #eee; border-radius: 4px; overflow: hidden; max-height: 120px;">
+            <img id="prop-preview-img" src="" alt="Evidence preview" style="max-height: 120px; width: auto; object-fit: cover;" />
+          </div>
         </div>
 
         <div class="form-row">
@@ -306,6 +326,26 @@ class MapReviewApp {
   }
 
   private bindPanelEvents(props: BuildingProperties): void {
+    const urlInput = document.getElementById('prop-evidence-url') as HTMLInputElement | null;
+    const imgPreviewBox = document.getElementById('prop-img-preview');
+    const previewImg = document.getElementById('prop-preview-img') as HTMLImageElement | null;
+
+    const updatePreview = () => {
+      const url = urlInput?.value.trim() || '';
+      const isImg = url.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i);
+      if (isImg && imgPreviewBox && previewImg) {
+        previewImg.src = url;
+        imgPreviewBox.style.display = 'block';
+      } else if (imgPreviewBox) {
+        imgPreviewBox.style.display = 'none';
+      }
+    };
+
+    if (urlInput) {
+      urlInput.addEventListener('input', updatePreview);
+      updatePreview();
+    }
+
     const btnPick = document.getElementById('btn-pick-entrance');
     if (btnPick) {
       btnPick.addEventListener('click', () => {

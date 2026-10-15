@@ -2,7 +2,7 @@
  * explorer.ts - Main Application Entry & UI Controller
  * 
  * Manages search, directory lists, detail drawer slide-out, mode transitions,
- * mobile touch controls, and WebGL error handling.
+ * route planning, 3-way time of day, procedural audio, deep-linking, and mobile controls.
  */
 
 import { UCHDataManager } from './data';
@@ -37,7 +37,7 @@ async function initUCHExplore(): Promise<void> {
   try {
     const data = await dataManager.loadAll();
 
-    // Elements
+    // DOM Elements
     const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
     const filterContainer = document.getElementById('filter-container');
     const directoryList = document.getElementById('directory-list');
@@ -54,20 +54,49 @@ async function initUCHExplore(): Promise<void> {
     const metaConfidence = document.getElementById('meta-confidence');
     const metaLevels = document.getElementById('meta-levels');
     const metaArea = document.getElementById('meta-area');
+    const btnDrawerRoute = document.getElementById('btn-drawer-route');
+    const btnDrawerShare = document.getElementById('btn-drawer-share');
+
+    // Controls
+    const btnDirections = document.getElementById('btn-directions');
+    const routePlannerCard = document.getElementById('route-planner-card');
+    const btnCloseRoute = document.getElementById('btn-close-route');
+    const routeFrom = document.getElementById('route-from') as HTMLSelectElement | null;
+    const routeTo = document.getElementById('route-to') as HTMLSelectElement | null;
+    const btnCalcRoute = document.getElementById('btn-calc-route');
+    const btnClearRoute = document.getElementById('btn-clear-route');
+    const routeSummary = document.getElementById('route-summary');
 
     const btnToggleWalk = document.getElementById('btn-toggle-walk');
     const btnExitWalk = document.getElementById('btn-exit-walk');
     const walkBanner = document.getElementById('walk-banner');
     const walkTouchOverlay = document.getElementById('walk-touch-overlay');
-    const btnToggleNight = document.getElementById('btn-toggle-night');
-    const nightIcon = document.getElementById('night-icon');
-    const nightLabel = document.getElementById('night-label');
+
+    const btnToggleTime = document.getElementById('btn-toggle-time');
+    const timeIcon = document.getElementById('time-icon');
+    const timeLabel = document.getElementById('time-label');
+
+    const btnToggleAudio = document.getElementById('btn-toggle-audio');
+    const audioIcon = document.getElementById('audio-icon');
+
+    const btnToggleLabels = document.getElementById('btn-toggle-labels');
     const btnToggleQuality = document.getElementById('btn-toggle-quality');
     const qualityLabel = document.getElementById('quality-label');
     const btnFullView = document.getElementById('btn-full-view');
     const btnMainGate = document.getElementById('btn-main-gate');
+    const toastMessage = document.getElementById('toast-message');
 
     let currentCategory = 'All';
+    let currentSelectedPlace: DestinationPlace | null = null;
+
+    function showToast(msg: string): void {
+      if (!toastMessage) return;
+      toastMessage.textContent = msg;
+      toastMessage.style.display = 'block';
+      setTimeout(() => {
+        toastMessage.style.display = 'none';
+      }, 3000);
+    }
 
     // Initialize 3D Scene
     const scene = new ExplorerScene(canvasContainer, data, {
@@ -76,6 +105,7 @@ async function initUCHExplore(): Promise<void> {
       },
       onDeselect: () => {
         if (drawer) drawer.classList.remove('open');
+        currentSelectedPlace = null;
       },
       onModeChange: (mode: 'orbit' | 'walk') => {
         const isWalk = mode === 'walk';
@@ -83,15 +113,44 @@ async function initUCHExplore(): Promise<void> {
         if (btnToggleWalk) {
           btnToggleWalk.classList.toggle('active', isWalk);
         }
-        // Show virtual joystick on mobile devices in walk mode
         if (walkTouchOverlay) {
           const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
           walkTouchOverlay.style.display = isWalk && isTouch ? 'block' : 'none';
         }
       },
+      onRouteCalculated: (route) => {
+        if (routeSummary) {
+          routeSummary.style.display = 'block';
+          routeSummary.innerHTML = `
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--uch-green);">
+              🚶 ${route.distanceMeters}m (~${route.walkingMinutes} min walk)
+            </div>
+            <ol style="margin-left: 18px; margin-top: 6px; font-size: 0.76rem; color: var(--warm-text-muted);">
+              ${route.instructions.map((step) => `<li>${step}</li>`).join('')}
+            </ol>
+          `;
+        }
+      },
     });
 
     scene.start();
+
+    // Populate Route Select Dropdowns
+    if (routeFrom && routeTo) {
+      for (const p of data.places) {
+        const opt1 = document.createElement('option');
+        opt1.value = p.id;
+        opt1.textContent = `${p.category}: ${p.shortName}`;
+        routeFrom.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = p.id;
+        opt2.textContent = `${p.category}: ${p.shortName}`;
+        routeTo.appendChild(opt2);
+      }
+      routeFrom.value = 'uch-gate-main';
+      routeTo.value = 'uch-bld-ae';
+    }
 
     // Populate Directory List
     function renderDirectory(): void {
@@ -139,6 +198,7 @@ async function initUCHExplore(): Promise<void> {
             ? data.buildings.features.find((b) => b.properties.id === place.targetBuildingId)?.properties
             : null;
           showBuildingDetails(bld || createSyntheticBuildingProps(place), place);
+          window.location.hash = `place=${place.id}`;
         });
 
         directoryList.appendChild(card);
@@ -167,6 +227,7 @@ async function initUCHExplore(): Promise<void> {
     // Detail Drawer rendering
     function showBuildingDetails(building: BuildingProperties, place?: DestinationPlace): void {
       if (!drawer) return;
+      currentSelectedPlace = place || null;
 
       const title = place ? place.name : building.name;
       const category = place ? place.category : building.category;
@@ -201,7 +262,7 @@ async function initUCHExplore(): Promise<void> {
           drawerAccess.style.borderLeftColor = 'var(--uch-green)';
           drawerAccess.style.background = 'var(--uch-green-subtle)';
         } else if (place) {
-          drawerAccess.innerHTML = `<strong>Access Notice:</strong> ${place.accessNotes} (Specific doorway under verification)`;
+          drawerAccess.innerHTML = `<strong>Access Notice:</strong> ${place.accessNotes} (Doorway under verification)`;
           drawerAccess.style.borderLeftColor = 'var(--uch-gold)';
           drawerAccess.style.background = 'var(--uch-gold-light)';
         } else {
@@ -238,6 +299,61 @@ async function initUCHExplore(): Promise<void> {
       });
     }
 
+    // Drawer action buttons (Route from Main Gate & Share Link)
+    if (btnDrawerRoute) {
+      btnDrawerRoute.addEventListener('click', () => {
+        if (!currentSelectedPlace) return;
+        if (routeFrom) routeFrom.value = 'uch-gate-main';
+        if (routeTo) routeTo.value = currentSelectedPlace.id;
+        if (routePlannerCard) routePlannerCard.style.display = 'block';
+        scene.planRoute('uch-gate-main', currentSelectedPlace.id);
+        showToast(`Route plotted to ${currentSelectedPlace.shortName}`);
+      });
+    }
+
+    if (btnDrawerShare) {
+      btnDrawerShare.addEventListener('click', () => {
+        if (!currentSelectedPlace) return;
+        const place = currentSelectedPlace;
+        const shareUrl = `${window.location.origin}${window.location.pathname}#place=${place.id}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          showToast(`Direct link copied for ${place.shortName}!`);
+        }).catch(() => {
+          showToast(`Direct link: ${shareUrl}`);
+        });
+      });
+    }
+
+    // Route Planner Controls
+    if (btnDirections) {
+      btnDirections.addEventListener('click', () => {
+        if (!routePlannerCard) return;
+        const isOpen = routePlannerCard.style.display === 'block';
+        routePlannerCard.style.display = isOpen ? 'none' : 'block';
+      });
+    }
+
+    if (btnCloseRoute) {
+      btnCloseRoute.addEventListener('click', () => {
+        if (routePlannerCard) routePlannerCard.style.display = 'none';
+      });
+    }
+
+    if (btnCalcRoute) {
+      btnCalcRoute.addEventListener('click', () => {
+        if (!routeFrom || !routeTo) return;
+        scene.planRoute(routeFrom.value, routeTo.value);
+      });
+    }
+
+    if (btnClearRoute) {
+      btnClearRoute.addEventListener('click', () => {
+        scene.clearRoute();
+        if (routeSummary) routeSummary.style.display = 'none';
+        showToast('Navigation route cleared.');
+      });
+    }
+
     // Header buttons
     if (btnToggleWalk) {
       btnToggleWalk.addEventListener('click', () => {
@@ -251,12 +367,44 @@ async function initUCHExplore(): Promise<void> {
       });
     }
 
-    if (btnToggleNight) {
-      btnToggleNight.addEventListener('click', () => {
-        const isNight = scene.toggleNightMode();
-        if (nightIcon) nightIcon.textContent = isNight ? '☀️' : '🌙';
-        if (nightLabel) nightLabel.textContent = isNight ? 'Day' : 'Night';
-        btnToggleNight.classList.toggle('active', isNight);
+    // 3-Way Time of Day Toggle (Day -> Sunset -> Night)
+    if (btnToggleTime) {
+      btnToggleTime.addEventListener('click', () => {
+        const nextTime = scene.cycleTimeOfDay();
+        if (timeIcon && timeLabel) {
+          if (nextTime === 'sunset') {
+            timeIcon.textContent = '🌅';
+            timeLabel.textContent = 'Sunset';
+          } else if (nextTime === 'night') {
+            timeIcon.textContent = '🌙';
+            timeLabel.textContent = 'Night';
+          } else {
+            timeIcon.textContent = '☀️';
+            timeLabel.textContent = 'Day';
+          }
+        }
+        showToast(`Lighting set to ${nextTime.toUpperCase()}`);
+      });
+    }
+
+    // Ambient Audio Synthesizer Toggle
+    if (btnToggleAudio) {
+      btnToggleAudio.addEventListener('click', () => {
+        const isActive = scene.toggleAudio();
+        if (audioIcon) {
+          audioIcon.textContent = isActive ? '🔊' : '🔇';
+        }
+        btnToggleAudio.classList.toggle('active', isActive);
+        showToast(isActive ? 'Ambient sound enabled' : 'Ambient sound muted');
+      });
+    }
+
+    // 3D Floating Landmark Labels Toggle
+    if (btnToggleLabels) {
+      btnToggleLabels.addEventListener('click', () => {
+        const isShown = scene.toggleLabels();
+        btnToggleLabels.classList.toggle('active', isShown);
+        showToast(isShown ? '3D landmark badges visible' : '3D landmark badges hidden');
       });
     }
 
@@ -285,7 +433,47 @@ async function initUCHExplore(): Promise<void> {
       });
     }
 
-    // Touch Virtual Joystick Logic
+    // Parse URL #hash on initial load for deep-linking
+    function checkDeepLink(): void {
+      const hash = window.location.hash.replace('#', '');
+      if (!hash) return;
+
+      const params = new URLSearchParams(hash);
+      const placeId = params.get('place');
+      const walk = params.get('walk');
+      const routeParam = params.get('route');
+
+      if (placeId) {
+        const p = data.places.find((item) => item.id === placeId);
+        if (p) {
+          setTimeout(() => {
+            scene.focusOnDestination(p);
+            const bld = p.targetBuildingId
+              ? data.buildings.features.find((b) => b.properties.id === p.targetBuildingId)?.properties
+              : null;
+            showBuildingDetails(bld || createSyntheticBuildingProps(p), p);
+          }, 600);
+        }
+      } else if (routeParam) {
+        const [from, to] = routeParam.split(':');
+        if (from && to) {
+          setTimeout(() => {
+            scene.planRoute(from, to);
+            if (routePlannerCard) routePlannerCard.style.display = 'block';
+            if (routeFrom) routeFrom.value = from;
+            if (routeTo) routeTo.value = to;
+          }, 600);
+        }
+      }
+
+      if (walk === 'true') {
+        setTimeout(() => {
+          scene.enterWalkMode();
+        }, 800);
+      }
+    }
+
+    checkDeepLink();
     setupVirtualJoystick(scene);
 
     // Hide loader
@@ -386,5 +574,4 @@ function setupVirtualJoystick(scene: ExplorerScene): void {
   base.addEventListener('touchcancel', endTouch);
 }
 
-// Kick off
 initUCHExplore();

@@ -2,20 +2,27 @@
  * explorer-scene.ts - Interactive 3D Scene Controller for UCH Explore
  * 
  * Orchestrates rendering, smooth orbit camera transitions, raycast picking,
- * day/night lighting, and seamless transitions into first-person outdoor walking.
+ * 3-way time-of-day lighting, ambient audio, A* route finding, floating landmark labels,
+ * and seamless transitions into first-person outdoor walking with mini-map HUD.
  */
 
 import * as THREE from 'three';
 import { LoadedExploreData } from './data';
 import { createWorldMaterials, setMaterialsNightMode, WorldMaterials } from './world/materials';
-import { setupLighting, WorldLighting } from './world/lighting';
+import { setupLighting, WorldLighting, TimeOfDay } from './world/lighting';
 import { buildBuildings, BuildingsBuildResult } from './world/buildings';
 import { buildRoads } from './world/roads';
 import { buildVegetation } from './world/vegetation';
 import { buildEntranceGate } from './world/entrance';
+import { buildArchitecturalLandmarks } from './world/landmarks';
 import { CollisionSystem } from './world/collision';
 import { WalkerController } from './world/walker';
 import { PerformanceManager } from './world/performance';
+import { NavigationGraph, RouteResult } from './world/routing';
+import { RouteVisualizer } from './world/route-visualizer';
+import { MiniMapHUD } from './world/minimap';
+import { FloatingLabelsManager } from './world/floating-labels';
+import { AmbientAudioSynthesizer } from './world/audio';
 import { wgs84ToCartesian } from './world/coordinates';
 import { BuildingProperties, DestinationPlace } from './types';
 
@@ -23,6 +30,7 @@ export interface SceneCallbacks {
   onSelectBuilding?: (building: BuildingProperties, place?: DestinationPlace) => void;
   onDeselect?: () => void;
   onModeChange?: (mode: 'orbit' | 'walk') => void;
+  onRouteCalculated?: (route: RouteResult) => void;
 }
 
 export class ExplorerScene {
@@ -36,6 +44,13 @@ export class ExplorerScene {
   private walker: WalkerController;
   private perf: PerformanceManager;
 
+  // Enhancements
+  private navGraph: NavigationGraph;
+  private routeVisualizer: RouteVisualizer;
+  private miniMap: MiniMapHUD;
+  private labelsManager!: FloatingLabelsManager;
+  private audioSynth: AmbientAudioSynthesizer;
+
   private buildingsResult!: BuildingsBuildResult;
   private exploreData!: LoadedExploreData;
   private callbacks: SceneCallbacks;
@@ -44,8 +59,8 @@ export class ExplorerScene {
   private mode: 'orbit' | 'walk' = 'orbit';
   private orbitTarget = new THREE.Vector3(0, 5, 0);
   private orbitDistance = 450;
-  private orbitTheta = 0.8; // Azimuth
-  private orbitPhi = Math.PI / 4.2; // Elevation
+  private orbitTheta = 0.8;
+  private orbitPhi = Math.PI / 4.2;
   private isPointerDown = false;
   private prevPointer = { x: 0, y: 0 };
   private isPanning = false;
@@ -68,7 +83,6 @@ export class ExplorerScene {
   private pointer = new THREE.Vector2();
   private selectedMesh: THREE.Mesh | null = null;
   private originalMat: THREE.Material | null = null;
-  private isNight = false;
 
   private isRunning = false;
   private lastTime = performance.now();
@@ -105,11 +119,22 @@ export class ExplorerScene {
     this.lighting = setupLighting(this.scene);
     this.collision = new CollisionSystem();
     this.perf = new PerformanceManager(this.renderer);
+    this.audioSynth = new AmbientAudioSynthesizer();
 
     this.walker = new WalkerController({
       camera: this.camera,
       domElement: this.renderer.domElement,
       collision: this.collision,
+    });
+
+    this.navGraph = new NavigationGraph(
+      this.exploreData.roads.features,
+      this.exploreData.paths.features
+    );
+    this.routeVisualizer = new RouteVisualizer(this.scene);
+    this.miniMap = new MiniMapHUD({
+      container,
+      places: this.exploreData.places,
     });
 
     // 4. Build Environment
@@ -146,9 +171,29 @@ export class ExplorerScene {
     const gateGroup = buildEntranceGate(this.materials);
     this.scene.add(gateGroup);
 
+    // Covered Breezeways & UCH Water Tower Landmark
+    const landmarksGroup = buildArchitecturalLandmarks(this.materials);
+    this.scene.add(landmarksGroup);
+
     // Instanced Tropical Trees & Street Lamps
     const vegetationGroup = buildVegetation(this.materials);
     this.scene.add(vegetationGroup);
+
+    // Floating 3D Landmark Labels
+    this.labelsManager = new FloatingLabelsManager(
+      this.container,
+      this.camera,
+      this.exploreData.places,
+      (place) => {
+        this.focusOnDestination(place, true);
+        const bld = place.targetBuildingId
+          ? this.exploreData.buildings.features.find((b) => b.properties.id === place.targetBuildingId)?.properties
+          : null;
+        if (this.callbacks.onSelectBuilding) {
+          this.callbacks.onSelectBuilding(bld || this.createSyntheticProps(place), place);
+        }
+      }
+    );
 
     // Center camera on hospital grounds overview
     this.setFullView(false);
@@ -178,6 +223,11 @@ export class ExplorerScene {
 
     if (this.mode === 'walk') {
       this.walker.update(delta);
+      this.miniMap.update(
+        this.walker.position.x,
+        this.walker.position.z,
+        this.camera.rotation.y
+      );
     } else {
       if (this.animActive) {
         this.updateCameraAnimation(delta);
@@ -185,10 +235,41 @@ export class ExplorerScene {
       this.updateOrbitCamera();
     }
 
+    // Update 3D floating badge positions
+    this.labelsManager.update();
+    this.routeVisualizer.update(delta);
+
     if (shouldRender) {
       this.renderer.render(this.scene, this.camera);
     }
   };
+
+  /**
+   * Calculates walking route between two places and displays it in 3D.
+   */
+  public planRoute(startPlaceId: string, destPlaceId: string): RouteResult | null {
+    const p1 = this.exploreData.places.find((p) => p.id === startPlaceId);
+    const p2 = this.exploreData.places.find((p) => p.id === destPlaceId);
+    if (!p1 || !p2) return null;
+
+    const c1 = wgs84ToCartesian(p1.coordinates[0], p1.coordinates[1]);
+    const c2 = wgs84ToCartesian(p2.coordinates[0], p2.coordinates[1]);
+
+    const result = this.navGraph.findRoute(c1.x, c1.z, c2.x, c2.z, p1.shortName, p2.shortName);
+    if (result) {
+      this.routeVisualizer.showRoute(result.path);
+      this.miniMap.setRoute(result.path);
+      if (this.callbacks.onRouteCalculated) {
+        this.callbacks.onRouteCalculated(result);
+      }
+    }
+    return result;
+  }
+
+  public clearRoute(): void {
+    this.routeVisualizer.clear();
+    this.miniMap.clearRoute();
+  }
 
   /**
    * Sets Orbit camera to show the full UCH grounds overview.
@@ -204,13 +285,12 @@ export class ExplorerScene {
   }
 
   /**
-   * Focuses camera smoothly onto a specific destination or coordinates.
+   * Focuses camera smoothly onto a specific destination.
    */
   public focusOnDestination(place: DestinationPlace, smooth = true): void {
     const cart = wgs84ToCartesian(place.coordinates[0], place.coordinates[1]);
     const target = new THREE.Vector3(cart.x, 8, cart.z);
 
-    // Select associated building mesh if present
     if (place.targetBuildingId) {
       const mesh = this.buildingsResult.buildingMap.get(place.targetBuildingId);
       if (mesh) {
@@ -223,18 +303,12 @@ export class ExplorerScene {
     this.transitionCameraTo(target, 120, this.orbitTheta, Math.PI / 4.0, smooth ? 1.2 : 0.0);
   }
 
-  /**
-   * Focuses camera on the verified UCH Main Entrance.
-   */
   public focusOnMainEntrance(): void {
     const gateCart = wgs84ToCartesian(3.90380, 7.40115);
     const target = new THREE.Vector3(gateCart.x, 5, gateCart.z);
     this.transitionCameraTo(target, 85, -0.4, Math.PI / 4.8, 1.2);
   }
 
-  /**
-   * Toggles between Orbit exploration and First-Person Walking mode.
-   */
   public toggleWalkingMode(): 'orbit' | 'walk' {
     if (this.mode === 'orbit') {
       this.enterWalkMode();
@@ -246,11 +320,11 @@ export class ExplorerScene {
 
   public enterWalkMode(): void {
     this.mode = 'walk';
-    // If target is far from current position, spawn at nearest public outdoor spot or Main Gate
     if (this.walker.position.lengthSq() < 10) {
       this.walker.spawnAt(3.90380, 7.40115);
     }
     this.walker.enable();
+    this.miniMap.setVisible(true);
     if (this.callbacks.onModeChange) this.callbacks.onModeChange('walk');
   }
 
@@ -258,8 +332,8 @@ export class ExplorerScene {
     this.mode = 'orbit';
     const currentWalkerPos = this.walker.position.clone();
     this.walker.disable();
+    this.miniMap.setVisible(false);
 
-    // Smoothly orbit around where the walker was standing
     this.orbitTarget.copy(currentWalkerPos);
     this.orbitDistance = 90;
     this.orbitPhi = Math.PI / 4.2;
@@ -276,11 +350,21 @@ export class ExplorerScene {
     return this.mode;
   }
 
-  public toggleNightMode(): boolean {
-    this.isNight = !this.isNight;
-    this.lighting.setNightMode(this.isNight);
-    setMaterialsNightMode(this.materials, this.isNight);
-    return this.isNight;
+  public cycleTimeOfDay(): TimeOfDay {
+    const current = this.lighting.getTimeOfDay();
+    const next: TimeOfDay = current === 'day' ? 'sunset' : current === 'sunset' ? 'night' : 'day';
+    this.lighting.setTimeOfDay(next);
+    setMaterialsNightMode(this.materials, next === 'night');
+    this.audioSynth.setTimeOfDay(next);
+    return next;
+  }
+
+  public toggleAudio(): boolean {
+    return this.audioSynth.toggleMute();
+  }
+
+  public toggleLabels(): boolean {
+    return this.labelsManager.toggle();
   }
 
   public toggleQuality(): boolean {
@@ -328,9 +412,7 @@ export class ExplorerScene {
       this.animActive = false;
     }
 
-    // Cubic ease-out
     const t = 1 - Math.pow(1 - this.animProgress, 3);
-
     this.orbitTarget.lerpVectors(this.animStartTarget, this.animEndTarget, t);
     this.orbitDistance = THREE.MathUtils.lerp(this.animStartDist, this.animEndDist, t);
     this.orbitTheta = THREE.MathUtils.lerp(this.animStartTheta, this.animEndTheta, t);
@@ -340,7 +422,6 @@ export class ExplorerScene {
   private updateOrbitCamera(): void {
     if (this.mode !== 'orbit') return;
 
-    // Calculate spherical camera offset
     const sinPhi = Math.sin(this.orbitPhi);
     const cosPhi = Math.cos(this.orbitPhi);
     const sinTheta = Math.sin(this.orbitTheta);
@@ -379,10 +460,26 @@ export class ExplorerScene {
     if (this.callbacks.onDeselect) this.callbacks.onDeselect();
   }
 
+  private createSyntheticProps(place: DestinationPlace): BuildingProperties {
+    return {
+      id: place.id,
+      osm_id: 0,
+      name: place.name,
+      category: place.category,
+      confidence: place.confidence,
+      is_identified: true,
+      levels: 1,
+      height_m: 5,
+      footprint_area_m2: 120,
+      center: place.coordinates,
+      architecture: 'Verified outdoor landmark.',
+      source: 'UCH Records',
+    };
+  }
+
   private bindEvents(): void {
     const dom = this.renderer.domElement;
 
-    // Resize handling
     window.addEventListener('resize', () => {
       const width = this.container.clientWidth;
       const height = this.container.clientHeight;
@@ -391,11 +488,10 @@ export class ExplorerScene {
       this.renderer.setSize(width, height);
     });
 
-    // Pointer events for Orbit, Pan & Selection
     dom.addEventListener('pointerdown', (e) => {
       if (this.mode === 'walk') return;
       this.isPointerDown = true;
-      this.isPanning = e.button === 2 || e.shiftKey; // Right-click or Shift-drag = Pan
+      this.isPanning = e.button === 2 || e.shiftKey;
       this.prevPointer.x = e.clientX;
       this.prevPointer.y = e.clientY;
       this.pointer.x = (e.clientX / dom.clientWidth) * 2 - 1;
@@ -409,10 +505,9 @@ export class ExplorerScene {
       this.prevPointer.x = e.clientX;
       this.prevPointer.y = e.clientY;
 
-      this.animActive = false; // User intervention breaks animation
+      this.animActive = false;
 
       if (this.isPanning) {
-        // Pan parallel to camera view plane
         const panSpeed = this.orbitDistance * 0.0014;
         const forward = new THREE.Vector3();
         this.camera.getWorldDirection(forward);
@@ -422,10 +517,8 @@ export class ExplorerScene {
         this.orbitTarget.addScaledVector(right, -dx * panSpeed);
         this.orbitTarget.addScaledVector(up, dy * panSpeed);
       } else {
-        // Rotate
         this.orbitTheta -= dx * 0.005;
         this.orbitPhi -= dy * 0.005;
-        // Clamp elevation to avoid flipping or ground clipping
         this.orbitPhi = Math.max(0.1, Math.min(Math.PI / 2.15, this.orbitPhi));
       }
     });
@@ -436,7 +529,6 @@ export class ExplorerScene {
       const dy = Math.abs(e.clientY - this.prevPointer.y);
       this.isPointerDown = false;
 
-      // Click detection if barely moved
       if (dx < 4 && dy < 4) {
         this.pointer.x = (e.clientX / dom.clientWidth) * 2 - 1;
         this.pointer.y = -(e.clientY / dom.clientHeight) * 2 + 1;
@@ -444,7 +536,6 @@ export class ExplorerScene {
       }
     });
 
-    // Zoom
     dom.addEventListener('wheel', (e) => {
       if (this.mode === 'walk') return;
       e.preventDefault();
@@ -453,7 +544,6 @@ export class ExplorerScene {
       this.orbitDistance = Math.max(25, Math.min(1100, this.orbitDistance * zoomFactor));
     }, { passive: false });
 
-    // Prevent context menu on right-click pan
     dom.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 

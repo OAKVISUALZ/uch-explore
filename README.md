@@ -81,17 +81,39 @@ The project centers on the primary UCH healthcare grounds at **Latitude 7.40250Â
    - Seamlessly exit back into Orbit mode centered right where you were walking.
    - Respects `prefers-reduced-motion` accessibility preferences.
 
-3. **Map-Review Workspace (`/review.html`):**
-   - 2D Leaflet interactive review map.
+4. **Turn-by-Turn Wayfinding & Route Planner:**
+   - **Topological A* Routing:** Realistic pedestrian shortest paths computed across real UCH roads and footpaths.
+   - **3D Animated Route Tubes:** Glowing path line with pulsating destination beacon.
+   - **Metrics & Direction Steps:** Displays calculated walking distance in meters, estimated walking minutes (80m/min pace), and step-by-step navigation cues.
+   - **One-Click Route from Drawer:** Select any building or place to immediately plot directions from the Main Gate or another entrance.
+   - **Deep-linking & URL Sharing:** Shareable direct URLs (`#place=uch-a-and-e`, `#route=uch-gate-main->uch-radiology`) with instant clipboard copy.
+
+5. **Walking Mini-Map Radar HUD:**
+   - Real-time 2D radar overlay during First-Person Walking mode.
+   - Displays player position, orientation heading cone, active route trajectory, and color-coded destination markers.
+
+6. **Authentic Campus Landmarks & Architectural Polish:**
+   - **UCH Elevated Water Tower:** Prominent historical utility landmark near the clinical core.
+   - **Covered Pedestrian Breezeways:** Canopy walkways connecting ward blocks and outpatient concourses.
+   - **Queen Elizabeth II Arrival Roundabout:** Circular driveway landmark at the primary hospital approach.
+   - **3D Floating Landmark Badges:** World-space HTML billboard labels with one-click camera focus, togglable via HUD.
+
+7. **Atmosphere, Lighting & Procedural Soundscape:**
+   - **3-Way Time of Day:** Seamless switching between Crisp Equatorial Day, Golden Sunset Twilight, and Atmospheric Night.
+   - **Procedural Tropical Soundscape:** Web Audio API synthesizer generating gentle tropical birdsong and distant city ambianceâ€”zero external audio files or bandwidth cost.
+
+8. **Map-Review Workspace with Satellite Aerials (`/review.html`):**
+   - 2D Leaflet interactive review map with instant toggle between **OpenStreetMap** and **Esri World Imagery High-Resolution Satellite**.
    - Inspect individual building footprints and their OpenStreetMap Way IDs.
    - Propose facility names and department associations.
    - Record evidence URLs, observation dates, confidence ratings, and rationale.
+   - **Live Evidence Image Previewer:** Live preview for submitted photographic evidence URLs directly in the review panel.
    - **Interactive Door Pinning:** Click directly on the building footprint on the map to record entrance coordinates.
    - Local draft persistence in `localStorage`.
    - **Export / Import JSON:** Backup and restore draft proposals in versioned JSON format (`uch-review-proposals-v1.json`) with strict schema validation.
    - Contributor proposals remain distinct drafts and are never silently published as verified data.
 
-4. **Mobile Optimization & Performance:**
+9. **Mobile Optimization & Performance:**
    - **Instanced Geometry:** Over 200 royal palms, shade trees, and streetlamps render in just 4 GPU draw calls via `THREE.InstancedMesh`.
    - **Shared Materials:** Shared textures and material instances across all 496 footprints.
    - **Clamped Pixel Ratio:** Limited to a maximum of 1.75 (or 1.0 in Eco mode) to conserve battery on high-DPI phone displays.
@@ -107,17 +129,17 @@ The project centers on the primary UCH healthcare grounds at **Latitude 7.40250Â
 
 | Metric | Target Budget | Measured Reality |
 |---|---|---|
-| Total Draw Calls | < 50 | **18 - 26 calls** |
-| Triangle Count | < 60,000 | **~24,500 triangles** |
-| JavaScript Bundle Size | < 250 kB gzipped | **~141 kB gzipped** (main app + Three.js) |
-| Review Bundle Size | < 80 kB gzipped | **~48 kB gzipped** (Leaflet + review app) |
+| Total Draw Calls | < 50 | **22 - 32 calls** |
+| Triangle Count | < 60,000 | **~28,500 triangles** |
+| JavaScript Bundle Size | < 250 kB gzipped | **~147 kB gzipped** (main app + Three.js + A* router) |
+| Review Bundle Size | < 80 kB gzipped | **~48 kB gzipped** (Leaflet + satellite layers) |
 | Navigation Network Calls | 0 external | **0 calls** (all data bundled statically) |
 
 ---
 
 ## ðŸ§ª Automated Verification Suite
 
-Run the automated test suite:
+Run the automated test suite (13 comprehensive tests):
 
 ```bash
 npm test
@@ -127,6 +149,7 @@ The test suite covers:
 - **`tests/coordinates.test.ts`:** Origin alignment, round-trip identity, scale factors, and physical distance verification.
 - **`tests/data.test.ts`:** GeoJSON polygon validity, stable `uch-bld-<osm_id>` identifiers, place-to-building relationships, and ODbL attribution.
 - **`tests/collision.test.ts`:** Spatial collision detection, perimeter proximity buffers, and multi-collider checks.
+- **`tests/routing.test.ts`:** Topological graph construction, A* path planning across roads and paths, distance and time calculations, and adjacent-point fallbacks.
 - **`tests/review.test.ts`:** Schema validation for proposal backups and rejection of malformed payloads.
 
 ---

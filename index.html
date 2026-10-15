@@ -26,11 +26,20 @@
             </div>
           </div>
           <div class="header-controls">
+            <button id="btn-directions" class="btn-icon" title="Get Directions & Route Finding">
+              <span>🧭</span> <span>Route</span>
+            </button>
             <button id="btn-toggle-walk" class="btn-icon" title="Toggle First-Person Walking">
               <span>🚶</span> <span>Walk</span>
             </button>
-            <button id="btn-toggle-night" class="btn-icon" title="Toggle Day/Night Mode">
-              <span id="night-icon">🌙</span> <span id="night-label">Night</span>
+            <button id="btn-toggle-time" class="btn-icon" title="Cycle Day / Sunset / Night">
+              <span id="time-icon">☀️</span> <span id="time-label">Day</span>
+            </button>
+            <button id="btn-toggle-audio" class="btn-icon" title="Toggle Tropical Ambient Audio">
+              <span id="audio-icon">🔇</span> <span>Sound</span>
+            </button>
+            <button id="btn-toggle-labels" class="btn-icon active" title="Toggle 3D Floating Landmark Labels">
+              <span>🏷️</span> <span>Labels</span>
             </button>
             <button id="btn-toggle-quality" class="btn-icon" title="Toggle Low/High Quality">
               <span id="quality-label">⚡ High</span>
@@ -46,6 +55,31 @@
       <div id="walk-banner" class="walk-banner">
         <span>🚶 Walking Mode (WASD / Touch Joystick to move, Drag to look)</span>
         <button id="btn-exit-walk">Exit to Orbit</button>
+      </div>
+
+      <!-- Route Planner Flyout Modal -->
+      <div id="route-planner-card" class="route-planner-card">
+        <div class="route-header">
+          <h3>🧭 Hospital Route Planner</h3>
+          <button id="btn-close-route" class="close-btn">&times;</button>
+        </div>
+        <div class="route-body">
+          <div class="route-field">
+            <label for="route-from">START POINT</label>
+            <select id="route-from" class="route-select"></select>
+          </div>
+          <div class="route-field">
+            <label for="route-to">DESTINATION</label>
+            <select id="route-to" class="route-select"></select>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button id="btn-calc-route" class="btn-route-action primary">Show Walking Route</button>
+            <button id="btn-clear-route" class="btn-route-action secondary">Clear</button>
+          </div>
+          <div id="route-summary" class="route-summary">
+            <!-- Populated with distance, time & directions -->
+          </div>
+        </div>
       </div>
 
       <!-- Left Sidebar: Search Directory -->
@@ -86,6 +120,15 @@
         </div>
         <div class="drawer-body">
           <div id="drawer-desc" class="drawer-desc">Description of destination.</div>
+
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button id="btn-drawer-route" class="btn-drawer-action">
+              <span>🧭</span> <span>Route from Main Gate</span>
+            </button>
+            <button id="btn-drawer-share" class="btn-drawer-action secondary">
+              <span>🔗</span> <span>Share Link</span>
+            </button>
+          </div>
 
           <div class="section-label">Building Identity & Footprint</div>
           <div class="drawer-meta-grid">
@@ -154,11 +197,14 @@
         </div>
       </div>
 
+      <!-- Toast Feedback Message -->
+      <div id="toast-message" class="toast-message"></div>
+
       <!-- Initial Loading Screen -->
       <div id="loading-overlay">
         <div class="loader-spinner"></div>
         <div class="loading-text">Loading UCH Explore...</div>
-        <div class="loading-subtext">Preparing 495 building footprints and hospital road networks</div>
+        <div class="loading-subtext">Preparing 496 building footprints, road networks & landmarks</div>
       </div>
 
       <!-- WebGL Error Fallback Modal -->
